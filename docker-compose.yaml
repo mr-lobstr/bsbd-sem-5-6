@@ -1,0 +1,16 @@
+services:
+    db_builder:
+        image: db_builder_image:1
+        container_name: db_builder
+        build:
+            context: .
+            dockerfile: Dockerfile.db_builder
+        volumes:
+            - db_storage:/var/lib/postgresql/data
+        ports:
+            - "15432:5432"
+        command: sh -c "rm -rf /var/lib/postgresql/data/* && docker-entrypoint.sh postgres"
+
+volumes:
+    db_storage:
+        driver: local

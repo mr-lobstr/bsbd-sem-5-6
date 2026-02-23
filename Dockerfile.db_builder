@@ -1,0 +1,9 @@
+FROM postgres:17-alpine
+
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=root
+ENV POSTGRES_DB=postal_db
+
+EXPOSE 5432
+
+COPY ./lab-1 /docker-entrypoint-initdb.d/
