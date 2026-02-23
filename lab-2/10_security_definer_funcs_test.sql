@@ -9,21 +9,21 @@ BEGIN
     RAISE NOTICE 'Тестирование ref.create_address_from_raw';
 
     SELECT * INTO res
-    FROM ref.create_address_from_raw(1, 'Московская область', 'Химки', NULL, '5');
+    FROM ref.create_address_from_raw(1, 'Московская область', 'Химки', NULL, 5);
 
     RAISE NOTICE 'Вызовы с некорректными данными данными:';
     RAISE NOTICE '%', res;
 
     SELECT * INTO res
-	FROM ref.create_address_from_raw(11, 'Московская область', 'Химки', 'Ленинградская', '5');
+	FROM ref.create_address_from_raw(11, 'Московская область', 'Химки', 'Ленинградская', 5);
    	RAISE NOTICE '%', res;
 
     SELECT * INTO res
-	FROM ref.create_address_from_raw(10, 'Московская область', 'Химки', 'Ленинградская', '5');
+	FROM ref.create_address_from_raw(10, 'Московская область', 'Химки', 'Ленинградская', 5);
     RAISE NOTICE '%', res;
 
 	SELECT * INTO res
-	FROM ref.create_address_from_raw(1, 'Московская область', 'Химки', 'Ленинградская', '5');
+	FROM ref.create_address_from_raw(1, 'Московская область', 'Химки', 'Ленинградская', 5);
 
 	RAISE NOTICE 'Успешный вызов:';
     RAISE NOTICE '%', res;

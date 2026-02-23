@@ -19,7 +19,7 @@ CREATE OR REPLACE FUNCTION ref.create_address_from_raw(
     locality_ VARCHAR(50),
     street_ VARCHAR(50),
     house_number_ INTEGER,
-    fraction_ INTEGER,
+    fraction_ INTEGER DEFAULT NULL,
     building_ VARCHAR(10) DEFAULT NULL
 )
 RETURNS JSONB
