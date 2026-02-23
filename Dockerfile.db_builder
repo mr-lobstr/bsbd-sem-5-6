@@ -8,3 +8,4 @@ EXPOSE 5432
 
 COPY ./lab-1 /docker-entrypoint-initdb.d/
 COPY ./lab-2 /docker-entrypoint-initdb.d/
+COPY ./lab-3 /docker-entrypoint-initdb.d/
