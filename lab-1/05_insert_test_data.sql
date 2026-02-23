@@ -153,47 +153,45 @@ INSERT INTO app.movement_history (
     (9, 9, '2025-11-10 13:00'),
     (10, 10, '2025-11-11 17:00');
 
+
 INSERT INTO stg.raw_addresses (
+    raw_text
+  , system
+  , received_at
+  , processed_at
+  , created_address_id
+  , normalized
+  , error_message
+) VALUES
+    ('Московская область, г. Химки, ул. Ленинградская, д. 5', 'crm_2', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Ленинградская область, г. Гатчина, пр. 25 Октября, д. 42', 'crm_3', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Республика Татарстан, г. Казань, ул. Баумана, д. 45', 'api_1', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Новосибирская область, г. Новосибирск, Красный проспект, д. 23', 'crm_1', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Свердловская область, г. Екатеринбург, ул. Ленина, д. 10', 'api_2', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Краснодарский край, г. Краснодар, ул. Северная, д. 7', 'crm_1', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Нижегородская область, г. Нижний Новгород, ул. Большая Покровская, д. 17', 'crm_3', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Самарская область, г. Самара, Московское шоссе, д. 88', 'api_1', NOW(), NOW() + random() * interval '1 days', NULL, false, NULL),
+    ('Приморский край, г. Владивосток, ул. Светланская, д. 3', 'api_3', NOW(), NOW() + random() * interval '1 days', NULL, false, NULL),
+    ('г. Москва, ул. Тверская, д. 12', 'crm_1', NOW(), NOW() + random() * interval '1 days', NULL, false, NULL);
+
+INSERT INTO stg.raw_clients (
     raw_text,
     system,
     received_at,
     processed_at,
-    address_id,
+    created_client_id,
     normalized,
     error_message
 ) VALUES
-    ('г. Москва, ул. Тверская, д. 12', 'crm_1', NOW(), NOW(), 1, TRUE, NULL),
-    ('г. Химки, ул. Ленинградская, д. 5', 'crm_2', NOW(), NOW(), 2, TRUE, NULL),
-    ('г. Санкт-Петербург, Невский проспект, д. 101', 'crm_3', NOW(), NOW(), 3, TRUE, NULL),
-    ('г. Казань, ул. Баумана, д. 45', 'api_1', NOW(), NOW(), 4, TRUE, NULL),
-    ('г. Новосибирск, Красный проспект, д. 23', 'crm_1', NOW(), NOW(), 5, TRUE, NULL),
-    ('г. Екатеринбург, ул. Ленина, д. 10', 'api_2', NOW(), NOW(), 6, TRUE, NULL),
-    ('г. Краснодар, ул. Северная, д. 7', 'crm_1', NOW(), NOW(), 7, TRUE, NULL),
-    ('г. Нижний Новгород, ул. Большая Покровская, д. 17', 'crm_3', NOW(), NOW(), 8, TRUE, NULL),
-    ('г. Самара, Московское шоссе, д. 88', 'api_1', NOW(), NOW(), 9, TRUE, NULL),
-    ('г. Владивосток, ул. Светланская, д. 3', 'api_3', NOW(), NOW(), 10, TRUE, NULL);
-
-INSERT INTO stg.raw_clients (
-    surname,
-    name,
-    middle_name,
-    date_of_birth,
-    phone,
-    address_text,
-    client_id,
-    received_at,
-    processed,
-    error_message
-) VALUES
-    ('Иванов', 'Алексей', 'Петрович', '1985-03-12', '+79001111111', 'г. Москва, ул. Тверская, д. 12, кв. 10', 1, NOW(), TRUE, NULL),
-    ('Петров', 'Сергей', 'Иванович', '1990-06-25', '+79002222222', 'г. Химки, ул. Ленинградская, д. 5, кв. 45', 2, NOW(), TRUE, NULL),
-    ('Сидорова', 'Марина', 'Александровна', '1988-11-09', '+79003333333', 'г. Санкт-Петербург, Невский пр., д. 101', 3, NOW(), TRUE, NULL),
-    ('Кузнецов', 'Дмитрий', 'Сергеевич', '1992-02-17', '+79004444444', 'г. Казань, ул. Баумана, д. 45', 4, NOW(), TRUE, NULL),
-    ('Попова', 'Анна', 'Викторовна', '1995-05-05', '+79005555555', 'г. Новосибирск, Красный пр., д. 23', 5, NOW(), TRUE, NULL),
-    ('Егоров', 'Николай', 'Игоревич', '1980-12-01', '+7900666A666', 'г. Екатеринбург, ул. Ленина, д. 10', NULL, NOW(), FALSE, 'Некорректный формат телефона'),
-    ('Васильева', 'Ольга', 'Андреевна', '1987-08-19', '+79007777777', 'г. Краснодар, ул. Северная, д. 7', NULL, NOW(), FALSE, NULL),
-    ('Федоров', 'Павел', 'Михайлович', '1991-04-14', '+79008888888', 'г. Нижний Новгород, ул. Большая Покровская, д. 17', NULL, NOW(), FALSE, NULL),
-    ('Морозов', 'Илья', 'Владимирович', '1983-10-03', '+79009999999', 'г. Самара, Московское шоссе, д. 88', NULL, NOW(), FALSE, 'Ошибка в адресе'),
-    ('Соколова', 'Елена', 'Николаевна', '1996-01-22', '+79100000000', 'г. Владивосток, ул. Светланская, д. 3', NULL, NOW(), FALSE, NULL);
+    ('Иванов, Иван, Иванович, 15.05.1980, +79991234567', 'crm_1', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Петрова, Мария, Сергеевна, 23.11.1995, +79876543210', 'crm_2', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Сидоров, Алексей, 07.08.1975, +79161234567', 'api_1', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Кузнецова, Елена, Дмитриевна, 30.01.1990, +79031234567', 'crm_3', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Смирнов, Дмитрий, Александрович, 12.09.1988, +79371234567', 'api_2', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Васильева, Ольга, Петровна, 25.03.1992, +73451234567', 'crm_1', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Николаев, Сергей, 18.12.1978, +79851234567', 'api_3', NOW(), NOW() + random() * interval '1 days', NULL, true, NULL),
+    ('Морозова, Анна, Владимировна, 03.07.1983, +78311234567', 'crm_2', NOW(), NOW() + random() * interval '1 days', NULL, false, NULL),
+    ('Волков, Павел, Андреевич, 14.11.1970, +78461234567', 'crm_1', NOW(), NOW() + random() * interval '1 days', NULL, false, NULL),
+    ('Соколова, Татьяна, Игоревна, 28.09.1985, +74231234567', 'api_3', NOW(), NOW() + random() * interval '1 days', NULL, false, NULL);
 
 RESET ROLE;

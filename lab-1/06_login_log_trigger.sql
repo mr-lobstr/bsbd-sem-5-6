@@ -7,8 +7,10 @@ CREATE TABLE audit.login_log (
     client_ip VARCHAR(45)
 );
 
-COMMENT ON TABLE stg.raw_clients IS 'История подключений пользователей';
+COMMENT ON TABLE audit.login_log IS 'История подключений пользователей';
 
+
+SET ROLE postgres;
 
 CREATE OR REPLACE FUNCTION audit.login_log_trg()
 RETURNS event_trigger
@@ -27,7 +29,7 @@ CREATE EVENT TRIGGER login_log_trigger
 ON login
 EXECUTE FUNCTION audit.login_log_trg();
 
-COMMENT ON TABLE EVENT TRIGGER login_log_trigger
+COMMENT ON EVENT TRIGGER login_log_trigger
 IS 'Автоматически создает запись в audit.login_log при подключении пользователя';
 
 RESET ROLE;
