@@ -7,3 +7,4 @@ ENV POSTGRES_DB=postal_db
 EXPOSE 5432
 
 COPY ./lab-1 /docker-entrypoint-initdb.d/
+COPY ./lab-2 /docker-entrypoint-initdb.d/

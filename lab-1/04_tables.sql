@@ -31,6 +31,9 @@ CREATE TABLE ref.statuses (
     name VARCHAR(30) NOT NULL
 );
 
+COMMENT ON TABLE ref.statuses IS 'Возможные статусы посылки';
+
+
 CREATE TABLE ref.routes (
     id SERIAL PRIMARY KEY,
     object_from_id INTEGER NOT NULL
@@ -152,6 +155,7 @@ IS 'Данные клиентов из внешних источников, ко
 CALL app.change_owner_to_app_owner('TABLE', 'ref.postal_objects');
 CALL app.change_owner_to_app_owner('TABLE', 'ref.addresses');
 CALL app.change_owner_to_app_owner('TABLE', 'ref.routes');
+CALL app.change_owner_to_app_owner('TABLE', 'ref.statuses');
 CALL app.change_owner_to_app_owner('TABLE', 'app.client_addresses');
 CALL app.change_owner_to_app_owner('TABLE', 'app.clients');
 CALL app.change_owner_to_app_owner('TABLE', 'app.packages');
