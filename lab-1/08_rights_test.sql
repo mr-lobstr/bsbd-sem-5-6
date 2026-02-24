@@ -68,25 +68,29 @@ BEGIN
 END;
 $$;
 
-SET ROLE app_owner;
-CALL pg_temp.rights_test();
+BEGIN;
 
-SET ROLE ddl_admin;
-CALL pg_temp.rights_test();
+    SET ROLE app_owner;
+    CALL pg_temp.rights_test();
 
-SET ROLE dml_admin;
-CALL pg_temp.rights_test();
+    SET ROLE ddl_admin;
+    CALL pg_temp.rights_test();
 
-SET ROLE security_admin;
-CALL pg_temp.rights_test();
+    SET ROLE dml_admin;
+    CALL pg_temp.rights_test();
 
-SET ROLE app_writer;
-CALL pg_temp.rights_test();
+    SET ROLE security_admin;
+    CALL pg_temp.rights_test();
 
-SET ROLE app_reader;
-CALL pg_temp.rights_test();
+    SET ROLE app_writer;
+    CALL pg_temp.rights_test();
 
-SET ROLE auditor;
-CALL pg_temp.rights_test();
+    SET ROLE app_reader;
+    CALL pg_temp.rights_test();
 
-RESET ROLE;
+    SET ROLE auditor;
+    CALL pg_temp.rights_test();
+
+    RESET ROLE;
+
+ROLLBACK;

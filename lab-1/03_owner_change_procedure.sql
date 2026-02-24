@@ -29,6 +29,7 @@ COMMENT ON PROCEDURE app.change_owner_to_app_owner
 IS 'Меняет владельца объекта на app_owner';
 
 GRANT EXECUTE
-    ON PROCEDURE app.change_owner_to_app_owner TO ddl_admin;
+ON PROCEDURE app.change_owner_to_app_owner
+TO ddl_admin;
 
 RESET ROLE;

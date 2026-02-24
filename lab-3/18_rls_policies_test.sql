@@ -1,3 +1,5 @@
+BEGIN;
+
 DO $$
 	DECLARE success BOOLEAN;
 		updated_count INTEGER;
@@ -21,13 +23,11 @@ BEGIN
 		INSERT INTO app.client_addresses (
     		address_id,
     		entrance,
-	    	flat,
-			segment_id
+	    	flat
 		) VALUES (
     		10,
     		2,
-    		3,
-			3
+    		3
 		);
 
 		RAISE NOTICE 'Успешная вставка с неверным segment_id';
@@ -60,13 +60,11 @@ BEGIN
 		INSERT INTO app.client_addresses (
     		address_id,
     		entrance,
-	    	flat,
-			segment_id
+	    	flat
 		) VALUES (
     		10,
     		2,
-    		300,
-			3
+    		300
 		);
 
 		RAISE NOTICE 'Успешная вставка с верным segment_id';
@@ -108,3 +106,5 @@ BEGIN
 	RAISE NOTICE 'Роль auditor. Прочитано строк: %', updated_count;
 END;
 $$;
+
+ROLLBACK;
