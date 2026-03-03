@@ -52,8 +52,12 @@ CREATE TABLE app.client_addresses (
     id SERIAL PRIMARY KEY,
     address_id INTEGER NOT NULL
         REFERENCES ref.addresses(id) ON DELETE RESTRICT,
+    flat INTEGER,
+    floor INTEGER,
     entrance INTEGER,
-    flat INTEGER
+    has_mailbox BOOLEAN,
+    intercom_code VARCHAR(6),
+    delivery_notes TEXT
 );
 
 COMMENT ON TABLE app.client_addresses IS 'Адреса клиентов';
@@ -67,7 +71,8 @@ CREATE TABLE app.clients (
     client_address_id INTEGER NOT NULL
         REFERENCES app.client_addresses(id) ON DELETE RESTRICT,
     date_of_birth DATE,
-    personal_phone VARCHAR(12)
+    personal_phone VARCHAR(12),
+    mail VARCHAR(30)
 );
 
 COMMENT ON TABLE app.clients IS 'Данные клиентов';
@@ -79,8 +84,10 @@ CREATE TABLE app.packages (
         type IN ('письмо', 'бандероль', 'посылка')
     ),
     receiving_method VARCHAR(20) NOT NULL CHECK (
-        receiving_method IN ('самовывоз', 'курьером')
+        receiving_method IN ('самовывоз', 'курьером', 'почтальоном')
     ),
+    weight INTEGER,
+    dimensions NUMERIC(10, 3)[],
     sender_id INTEGER NOT NULL
         REFERENCES app.clients(id) ON DELETE RESTRICT,
     recipient_id INTEGER NOT NULL
