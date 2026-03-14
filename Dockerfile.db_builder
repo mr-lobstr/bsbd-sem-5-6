@@ -1,4 +1,4 @@
-FROM postgres:17-alpine
+FROM registry.gitlab.com/dalibo/postgresql_anonymizer:stable
 
 ENV POSTGRES_USER=postgres
 ENV POSTGRES_PASSWORD=root
@@ -9,3 +9,4 @@ EXPOSE 5432
 COPY ./lab-1 /docker-entrypoint-initdb.d/
 COPY ./lab-2 /docker-entrypoint-initdb.d/
 COPY ./lab-3 /docker-entrypoint-initdb.d/
+COPY ./lab-4 /docker-entrypoint-initdb.d/

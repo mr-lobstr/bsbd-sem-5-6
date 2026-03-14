@@ -68,7 +68,7 @@ CREATE TABLE app.clients (
     surname VARCHAR(30) NOT NULL,
     name VARCHAR(30) NOT NULL,
     middle_name VARCHAR(30),
-    client_address_id INTEGER NOT NULL
+    client_address_id INTEGER
         REFERENCES app.client_addresses(id) ON DELETE RESTRICT,
     date_of_birth DATE,
     personal_phone VARCHAR(12),
@@ -86,8 +86,10 @@ CREATE TABLE app.packages (
     receiving_method VARCHAR(20) NOT NULL CHECK (
         receiving_method IN ('самовывоз', 'курьером', 'почтальоном')
     ),
-    weight INTEGER,
-    dimensions NUMERIC(10, 3)[],
+    weight NUMERIC(10, 3),
+    length NUMERIC(10, 3),
+    width NUMERIC(10, 3),
+    height NUMERIC(10, 3),
     sender_id INTEGER NOT NULL
         REFERENCES app.clients(id) ON DELETE RESTRICT,
     recipient_id INTEGER NOT NULL

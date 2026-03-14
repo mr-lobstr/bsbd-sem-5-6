@@ -5,7 +5,7 @@ CREATE INDEX packages_id_idx ON app.packages(id);
 CREATE INDEX packages_type_idx ON app.packages(type);
 
 CREATE INDEX clients_segment_id_idx ON app.clients(segment_id);
-CREATE INDEX clients_id_idx ON app.clients(id);
+CREATE INDEX clients_idx ON app.clients(id);
 
 CREATE INDEX client_addresses_segment_id_idx ON app.client_addresses(segment_id);
 CREATE INDEX client_addresses_id_idx ON app.client_addresses(id);
