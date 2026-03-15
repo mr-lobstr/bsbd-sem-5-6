@@ -1,7 +1,6 @@
 SET ROLE app_owner;
 
-CREATE VIEW app.client_addresses_for_postal_delivery
-WITH (security_barrier) AS
+CREATE VIEW app.client_addresses_for_postal_delivery AS
 SELECT
     id,
     address_id,
@@ -16,8 +15,7 @@ COMMENT ON VIEW app.client_addresses_for_postal_delivery
 IS 'Данные адресов клиентов доступные почтальонам';
 
 
-CREATE VIEW app.client_contact_info
-WITH (security_barrier) AS
+CREATE VIEW app.client_contact_info AS
 SELECT
     id,
     surname,
