@@ -5,7 +5,7 @@ CREATE TABLE audit.row_change_log_archive (
     username VARCHAR(50) NOT NULL DEFAULT current_user,
     table_name VARCHAR(50) NOT NULL,
     change_timestamp  TIMESTAMP NOT NULL DEFAULT NOW(),
-    old_data JSONB NOT NULL,
+    old_data JSONB,
     new_data JSONB
 );
 

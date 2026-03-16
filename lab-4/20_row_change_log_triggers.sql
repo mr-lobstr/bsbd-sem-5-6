@@ -12,7 +12,7 @@ CREATE TABLE audit.row_change_log (
     username VARCHAR(50) NOT NULL DEFAULT session_user,
     table_name VARCHAR(50) NOT NULL,
     change_timestamp  TIMESTAMP NOT NULL DEFAULT NOW(),
-    old_data JSONB NOT NULL,
+    old_data JSONB,
     new_data JSONB
 );
 

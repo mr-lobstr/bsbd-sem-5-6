@@ -2,6 +2,7 @@ BEGIN;
 
 DO $$
     DECLARE result RECORD;
+	updated_count INTEGER;
 BEGIN
     SET ROLE app_writer;
 
@@ -34,7 +35,7 @@ BEGIN
     FROM app.parcels_dimensions_stats
     WHERE avg_weight > 100
         AND avg_length > 0.2;
-        
+
 
     BEGIN
         RAISE NOTICE E'История изменений в таблице app.clients: \n';
@@ -105,6 +106,16 @@ BEGIN
 
         RAISE NOTICE E'Содержимое таблицы audit.row_change_log_archive: %\n', to_jsonb(result);
     END;
+
+
+    SET ROLE app_writer;
+
+    DELETE FROM app.packages
+    WHERE segment_id = 7;
+    GET DIAGNOSTICS updated_count = ROW_COUNT;
+
+    RAISE NOTICE E'Попытка удалить строку не из своего сегмента:\n';
+    RAISE NOTICE E'Строк удалено: %\n', updated_count;
 END;
 $$;
 
