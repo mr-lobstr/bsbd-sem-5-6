@@ -2,9 +2,10 @@ SET ROLE app_owner;
 
 CREATE TABLE audit.row_change_log_archive (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(50) NOT NULL DEFAULT current_user,
+    username VARCHAR(50) NOT NULL,
     table_name VARCHAR(50) NOT NULL,
-    change_timestamp  TIMESTAMP NOT NULL DEFAULT NOW(),
+    change_timestamp TIMESTAMP NOT NULL,
+    operation VARCHAR(15) NOT NULL,
     old_data JSONB,
     new_data JSONB
 );
@@ -25,7 +26,14 @@ BEGIN
         RETURNING *
     )
     INSERT INTO audit.row_change_log_archive
-    SELECT *
+    SELECT
+        id,
+        username,
+        table_name,
+        change_timestamp,
+        operation,
+        old_data,
+        new_data
     FROM moved_rows;
 END;
 $$;

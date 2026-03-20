@@ -1,44 +1,13 @@
-SET ROLE postgres;
-
 BEGIN;
 
-CREATE TABLE pg_temp.test_data (
-    address_id INTEGER,
-    flat INTEGER,
-    floor INTEGER,
-    entrance INTEGER,
-    has_mailbox BOOLEAN,
-    intercom_code VARCHAR(6),
-    delivery_notes TEXT
-);
+SET ROLE app_owner;
 
-DO $$
-BEGIN
-    PERFORM app.set_session_ctx(1, 1);
-
-    INSERT INTO pg_temp.test_data (
-        address_id,
-        flat,
-        floor,
-        entrance,
-        has_mailbox,
-        intercom_code,
-        delivery_notes
-    ) SELECT 
-        (9 * random() + 1)::INTEGER,
-        (10 * random())::INTEGER,
-        (10 * random())::INTEGER,
-        (100 * random())::INTEGER,
-        (random() > 0.5),
-        floor(999999 * random())::TEXT,
-        md5(random()::TEXT)
-    FROM generate_series(1, 10000) i;
-END;
-$$;
-
-
-CREATE PROCEDURE pg_temp.print_explain(operation VARCHAR(50), plan_ JSONB)
+CREATE PROCEDURE pg_temp.print_explain(
+    operation VARCHAR(50),
+    plan_ JSONB
+)
 LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
     DECLARE plan JSONB;
         rows_ INTEGER;
@@ -65,12 +34,59 @@ END;
 $$;
 
 
-CREATE PROCEDURE pg_temp.insert_select_update_explain()
+CREATE PROCEDURE pg_temp.speed_test(
+    row_count INTEGER,
+    with_rls BOOLEAN,
+    with_index BOOLEAN
+)
 LANGUAGE plpgsql
 AS $$
     DECLARE plan JSONB;
         result RECORD;
 BEGIN
+
+    CREATE TABLE pg_temp.test_data (
+        address_id INTEGER,
+        flat INTEGER,
+        floor INTEGER,
+        entrance INTEGER,
+        has_mailbox BOOLEAN,
+        intercom_code VARCHAR(6),
+        delivery_notes TEXT
+    );
+
+    INSERT INTO pg_temp.test_data (
+        address_id,
+        flat,
+        floor,
+        entrance,
+        has_mailbox,
+        intercom_code,
+        delivery_notes
+    ) SELECT 
+        i % 10 + 1,
+        i % 10 + 1,
+        i % 10 + 1,
+        i % 10 + 1,
+        i % 2 = 0,
+        (i)::TEXT,
+        md5((i)::TEXT)
+    FROM generate_series(1, row_count) i;
+
+
+    IF NOT with_rls THEN
+        ALTER TABLE app.client_addresses
+        DISABLE ROW LEVEL SECURITY;
+    END IF;
+
+
+    IF NOT with_index THEN
+        DROP INDEX app.client_addresses_segment_id_idx;
+        DROP INDEX app.client_addresses_id_idx;
+        DROP INDEX app.client_addresses_address_id_idx;
+    END IF;
+
+
     EXECUTE $q$
         EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
         INSERT INTO app.client_addresses (
@@ -109,6 +125,7 @@ BEGIN
     CALL pg_temp.print_explain('UPDATE', plan);
 
     RAISE EXCEPTION '';
+
 EXCEPTION WHEN OTHERS THEN
     RAISE NOTICE '%', SQLERRM;
 END;
@@ -116,23 +133,18 @@ $$;
 
 DO $$
 BEGIN
+    PERFORM app.set_session_ctx(1, 1);
+
     RAISE NOTICE 'Включены RLS, индексы:';
-    CALL pg_temp.insert_select_update_explain();
+    CALL pg_temp.speed_test(100000, true, true);
     RAISE NOTICE '';
 
-    DROP INDEX app.client_addresses_segment_id_idx;
-    DROP INDEX app.client_addresses_id_idx;
-    DROP INDEX app.client_addresses_address_id_idx;
-    
     RAISE NOTICE 'Включены RLS, без индексов:';
-    CALL pg_temp.insert_select_update_explain();
+    CALL pg_temp.speed_test(100000, true, false);
     RAISE NOTICE '';
-
-    ALTER TABLE app.client_addresses
-    DISABLE ROW LEVEL SECURITY;
 
     RAISE NOTICE 'Выключены RLS, без индексов:';
-    CALL pg_temp.insert_select_update_explain();
+    CALL pg_temp.speed_test(100000, false, false);
     RAISE NOTICE '';
 
 END;

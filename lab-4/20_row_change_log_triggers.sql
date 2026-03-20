@@ -12,6 +12,7 @@ CREATE TABLE audit.row_change_log (
     username VARCHAR(50) NOT NULL DEFAULT session_user,
     table_name VARCHAR(50) NOT NULL,
     change_timestamp  TIMESTAMP NOT NULL DEFAULT NOW(),
+    operation VARCHAR(15) NOT NULL,
     old_data JSONB,
     new_data JSONB
 );
@@ -58,11 +59,13 @@ BEGIN
     INSERT INTO audit.row_change_log(
         username,
         table_name,
+        operation,
         old_data,
         new_data
     ) VALUES (
         session_user,
         'app.client_addresses',
+        TG_OP,
         old_data_,
         new_data_
     );
@@ -126,11 +129,13 @@ BEGIN
     INSERT INTO audit.row_change_log(
         username,
         table_name,
+        operation,
         old_data,
         new_data
     ) VALUES (
         session_user,
         'app.clients',
+        TG_OP,
         old_data_,
         new_data_
     );
