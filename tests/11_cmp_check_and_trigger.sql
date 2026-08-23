@@ -1,16 +1,14 @@
 SET ROLE app_owner;
 
-BEGIN;
-
-CREATE TEMP TABLE pg_temp.test_raw_addresses_data(
+CREATE TEMP TABLE test_raw_addresses_data(
     raw_text TEXT NOT NULL,
     system VARCHAR(100) NOT NULL,
     received_at TIMESTAMP NOT NULL DEFAULT NOW(),
     processed_at TIMESTAMP
-) ON COMMIT DROP;
+);
 
 
-CREATE TEMP TABLE pg_temp.test_raw_addresses_with_check(
+CREATE TEMP TABLE test_raw_addresses_with_check(
     raw_text TEXT NOT NULL,
     system VARCHAR(100) NOT NULL,
     received_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -18,15 +16,15 @@ CREATE TEMP TABLE pg_temp.test_raw_addresses_with_check(
 
     CONSTRAINT received_before_processed
     CHECK (processed_at IS NULL OR received_at <= processed_at)
-) ON COMMIT DROP;
+);
 
 
-CREATE TEMP TABLE pg_temp.test_raw_addresses_with_trigger(
+CREATE TEMP TABLE test_raw_addresses_with_trigger(
     raw_text TEXT NOT NULL,
     system VARCHAR(100) NOT NULL,
     received_at TIMESTAMP NOT NULL DEFAULT NOW(),
     processed_at TIMESTAMP
-) ON COMMIT DROP;
+);
 
 CREATE OR REPLACE FUNCTION pg_temp.test_raw_addresses_trigger()
 RETURNS TRIGGER
@@ -44,12 +42,12 @@ END;
 $$;
 
 CREATE TRIGGER test_raw_addresses_trg
-BEFORE INSERT ON pg_temp.test_raw_addresses_with_trigger
+BEFORE INSERT ON test_raw_addresses_with_trigger
 FOR EACH ROW
 EXECUTE FUNCTION pg_temp.test_raw_addresses_trigger();
 
 
-INSERT INTO pg_temp.test_raw_addresses_data(
+INSERT INTO test_raw_addresses_data(
     raw_text,
     system,
     received_at,
@@ -59,7 +57,7 @@ INSERT INTO pg_temp.test_raw_addresses_data(
     'test system',
     NOW(),
     NOW() + random() * interval '365 days'
-FROM generate_series(1, 10000) i;
+FROM generate_series(1, 100000) i;
 
 
 DO $$
@@ -70,8 +68,8 @@ DECLARE
 BEGIN
     EXECUTE $q$
         EXPLAIN (ANALYZE, FORMAT JSON)
-        INSERT INTO pg_temp.test_raw_addresses_with_check
-        SELECT * FROM pg_temp.test_raw_addresses_data;
+        INSERT INTO test_raw_addresses_with_check
+        SELECT * FROM test_raw_addresses_data;
     $q$
     INTO plan;
 
@@ -79,8 +77,8 @@ BEGIN
 
     EXECUTE $q$
         EXPLAIN (ANALYZE, FORMAT JSON)
-        INSERT INTO pg_temp.test_raw_addresses_with_trigger
-        SELECT * FROM pg_temp.test_raw_addresses_data;
+        INSERT INTO test_raw_addresses_with_trigger
+        SELECT * FROM test_raw_addresses_data;
     $q$
     INTO plan;
 
@@ -88,9 +86,9 @@ BEGIN
 END;
 $$;
 
-TRUNCATE TABLE pg_temp.test_raw_addresses_data;
+TRUNCATE TABLE test_raw_addresses_data;
 
-INSERT INTO pg_temp.test_raw_addresses_data(
+INSERT INTO test_raw_addresses_data(
     raw_text,
     system,
     received_at,
@@ -100,21 +98,21 @@ INSERT INTO pg_temp.test_raw_addresses_data(
     'test system',
     NOW() + random() * interval '365 days',
     NOW() + random() * interval '365 days'
-FROM generate_series(1, 10000) i;
+FROM generate_series(1, 100000) i;
 
 DO $$
 DECLARE
     rec RECORD;
     failed_count INTEGER := 0;
 BEGIN
-    FOR rec IN SELECT * FROM pg_temp.test_raw_addresses_data LOOP
+    FOR rec IN SELECT * FROM test_raw_addresses_data LOOP
         BEGIN
-            INSERT INTO pg_temp.test_raw_addresses_with_check(
-				raw_text,
-				system,
-				received_at,
-				processed_at
-			) VALUES(
+            INSERT INTO test_raw_addresses_with_check(
+        raw_text,
+        system,
+        received_at,
+        processed_at
+      ) VALUES(
                 rec.raw_text,
                 rec.system,
                 rec.received_at,
@@ -129,14 +127,14 @@ BEGIN
 
     failed_count := 0;
 
-    FOR rec IN SELECT * FROM pg_temp.test_raw_addresses_data LOOP
+    FOR rec IN SELECT * FROM test_raw_addresses_data LOOP
         BEGIN
-            INSERT INTO pg_temp.test_raw_addresses_with_trigger(
-				raw_text,
-				system,
-				received_at,
-				processed_at
-			) VALUES(
+            INSERT INTO test_raw_addresses_with_trigger(
+        raw_text,
+        system,
+        received_at,
+        processed_at
+      ) VALUES(
                 rec.raw_text,
                 rec.system,
                 rec.received_at,
@@ -150,12 +148,12 @@ BEGIN
     RAISE NOTICE 'Тест TRIGGER, строк с некорректными данными: %', failed_count;
 
     BEGIN
-        INSERT INTO pg_temp.test_raw_addresses_with_check(
-			raw_text,
-			system,
-			received_at,
-			processed_at
-		) VALUES(
+        INSERT INTO test_raw_addresses_with_check(
+      raw_text,
+      system,
+      received_at,
+      processed_at
+    ) VALUES(
             'test text',
             'test system',
             '2026-02-02',
@@ -164,14 +162,14 @@ BEGIN
     EXCEPTION WHEN OTHERS THEN
         RAISE NOTICE 'Сообщение об ошибке CHECK: %', SQLERRM;
     END;
-
+    
     BEGIN
-        INSERT INTO pg_temp.test_raw_addresses_with_trigger(
-			raw_text,
-			system,
-			received_at,
-			processed_at
-		) VALUES(
+        INSERT INTO test_raw_addresses_with_trigger(
+      raw_text,
+      system,
+      received_at,
+      processed_at
+    ) VALUES(
             'test text',
             'test system',
             '2026-02-02',
@@ -182,7 +180,5 @@ BEGIN
     END;
 END;
 $$;
-
-COMMIT;
 
 RESET ROLE;

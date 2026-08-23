@@ -69,7 +69,6 @@ END;
 $$;
 
 BEGIN;
-
     SET ROLE app_owner;
     CALL pg_temp.rights_test();
 
@@ -92,5 +91,4 @@ BEGIN;
     CALL pg_temp.rights_test();
 
     RESET ROLE;
-
 ROLLBACK;

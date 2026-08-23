@@ -41,7 +41,6 @@ BEGIN
 	GET DIAGNOSTICS updated_count = ROW_COUNT;
 
 	RAISE NOTICE 'Обновление с неверным segment_id. Обновлено строк: %', updated_count;
-
 	RAISE NOTICE '';
 	RAISE NOTICE 'Действия с верным segment_id:';
 
@@ -89,6 +88,7 @@ BEGIN
 	RAISE NOTICE 'Тестирование политик для auditor:';
 
 	SET ROLE app_reader;
+
 	SELECT app.set_session_ctx(3, 3) INTO success;
 
 	SELECT COUNT(*)

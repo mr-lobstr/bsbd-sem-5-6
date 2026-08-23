@@ -1,6 +1,5 @@
 BEGIN;
 
-
 CREATE FUNCTION pg_temp.print(INTEGER)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -41,7 +40,6 @@ BEGIN
             E'Ошибка при вставке в app.client_addresses_for_postal_delivery: %\n', SQLERRM;
     END;
 
-
     RAISE NOTICE E'Попытка обойти SECURITY BARIER:';
 
     INSERT INTO app.status_history(
@@ -60,8 +58,6 @@ BEGIN
     WHERE pg_temp.print(status_id);
 
     RAISE NOTICE '%\n', result;
-
-
     RAISE NOTICE E'Попытка удалить строку не из своего сегмента:';
 
     DELETE FROM app.packages

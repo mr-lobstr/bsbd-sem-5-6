@@ -62,11 +62,7 @@ $$;
 
 
 BEGIN;
-
     SET ROLE app_writer;
-
     CALL pg_temp.security_definer_funcs_test();
-
     RESET ROLE;
-
 ROLLBACK;

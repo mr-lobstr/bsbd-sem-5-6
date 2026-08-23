@@ -14,12 +14,13 @@ AS $$
 BEGIN
     plan := plan_->0;
 
-    SELECT COALESCE(
-        plan->'Plan'->'Plans'->0->>'Actual Rows',
-        plan->'Plan'->>'Actual Rows'
+    SELECT (
+        COALESCE(
+            plan->'Plan'->'Plans'->0->>'Actual Rows',
+            plan->'Plan'->>'Actual Rows'
+        )::NUMERIC
     )::INTEGER
     INTO rows_;
-
 
     RAISE NOTICE
     E'%: Время: %,\t\t Строк: %,\t Чтение кеша: (Общий: %,\t Локал.: %),\t Запись в кеш: (Общий: %,\t Локал.: %)',
@@ -44,8 +45,7 @@ AS $$
     DECLARE plan JSONB;
         result RECORD;
 BEGIN
-
-    CREATE TABLE pg_temp.test_data (
+    CREATE TEMP TABLE test_data (
         address_id INTEGER,
         flat INTEGER,
         floor INTEGER,
@@ -55,7 +55,7 @@ BEGIN
         delivery_notes TEXT
     );
 
-    INSERT INTO pg_temp.test_data (
+    INSERT INTO test_data (
         address_id,
         flat,
         floor,
@@ -73,19 +73,16 @@ BEGIN
         md5((i)::TEXT)
     FROM generate_series(1, row_count) i;
 
-
     IF NOT with_rls THEN
         ALTER TABLE app.client_addresses
         DISABLE ROW LEVEL SECURITY;
     END IF;
-
 
     IF NOT with_index THEN
         DROP INDEX app.client_addresses_segment_id_idx;
         DROP INDEX app.client_addresses_id_idx;
         DROP INDEX app.client_addresses_address_id_idx;
     END IF;
-
 
     EXECUTE $q$
         EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
@@ -98,7 +95,7 @@ BEGIN
             intercom_code,
             delivery_notes
         )
-        SELECT * FROM pg_temp.test_data;
+        SELECT * FROM test_data;
     $q$
     INTO plan;
 
@@ -123,13 +120,13 @@ BEGIN
     INTO plan;
 
     CALL pg_temp.print_explain('UPDATE', plan);
-
     RAISE EXCEPTION '';
 
 EXCEPTION WHEN OTHERS THEN
     RAISE NOTICE '%', SQLERRM;
 END;
 $$;
+
 
 DO $$
 BEGIN
@@ -146,7 +143,6 @@ BEGIN
     RAISE NOTICE 'Выключены RLS, без индексов:';
     CALL pg_temp.speed_test(100000, false, false);
     RAISE NOTICE '';
-
 END;
 $$;
 

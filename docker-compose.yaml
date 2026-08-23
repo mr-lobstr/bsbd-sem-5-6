@@ -6,10 +6,10 @@ services:
             context: .
             dockerfile: Dockerfile.db_builder
         volumes:
-            - db_storage:/var/lib/postgresql/data
+            - db_storage:/var/lib/postgresql/data/18
         ports:
             - "15432:5432"
-        command: sh -c "rm -rf /var/lib/postgresql/data/* && docker-entrypoint.sh postgres"
+        command: sh -c "rm -rf /var/lib/postgresql/data/18/* && docker-entrypoint.sh postgres"
 
 volumes:
     db_storage:

@@ -41,7 +41,6 @@ BEGIN
 
     RESET ROLE;
 
-
     RAISE NOTICE E'Вызов audit.backup_audit_logs(1 день): \n';
     CALL audit.backup_audit_logs(1);
 
@@ -56,9 +55,8 @@ BEGIN
     FROM audit.row_change_log_archive;
 
     RAISE NOTICE E'Содержимое таблицы audit.row_change_log_archive: %\n', to_jsonb(result);
-
-
     RAISE NOTICE E'Вызов audit.backup_audit_logs(0 дней): \n';
+
     CALL audit.backup_audit_logs(0);
 
     SELECT *
