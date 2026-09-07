@@ -9,7 +9,6 @@ services:
             - db_storage:/var/lib/postgresql/data/18
         ports:
             - "15432:5432"
-        command: sh -c "rm -rf /var/lib/postgresql/data/18/* && docker-entrypoint.sh postgres"
 
 volumes:
     db_storage:
