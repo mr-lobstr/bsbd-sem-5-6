@@ -35,7 +35,9 @@ CREATE TABLE ref.base_tariffs (
     route_id INTEGER NOT NULL
         REFERENCES ref.routes(id) ON DELETE RESTRICT,
     max_weight_grams INTEGER NOT NULL,
-    price NUMERIC(10, 2) NOT NULL
+    price NUMERIC(10, 2) NOT NULL,
+
+    UNIQUE(departure_type_id, route_id, max_weight_grams)
 );
 
 COMMENT ON TABLE ref.base_tariffs
@@ -49,7 +51,9 @@ CREATE TABLE ref.additional_weight_tariffs (
     route_id INTEGER NOT NULL
         REFERENCES ref.routes(id) ON DELETE RESTRICT,
     step_weight_grams INTEGER NOT NULL,
-    price NUMERIC(10, 2) NOT NULL
+    price NUMERIC(10, 2) NOT NULL,
+
+    UNIQUE(departure_type_id, route_id, step_weight_grams)
 );
 
 COMMENT ON TABLE ref.additional_weight_tariffs
