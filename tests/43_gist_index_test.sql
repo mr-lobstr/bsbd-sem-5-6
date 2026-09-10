@@ -17,64 +17,65 @@ AS $$
 $$;
 
 
-CREATE TEMP TABLE gist_data (
+CREATE TEMP TABLE departures_operations_data (
     id SERIAL PRIMARY KEY,
-    area BOX NOT NULL
+    operation VARCHAR(100) NOT NULL,
+    departure_id INTEGER NOT NULL,
+    employe_id INTEGER NOT NULL,
+    period TSRANGE NOT NULL
+);
+
+CREATE TEMP TABLE departures_operations (
+    LIKE departures_operations_data
 );
 
 
-INSERT INTO gist_data (area)
+INSERT INTO departures_operations_data (
+    operation,
+    departure_id,
+    employe_id,
+    period
+)
 SELECT
-    box(
-        point(x, y),
-        point(x + 10, y + 10)
-    )
+    (ARRAY[
+        'приём в пункте отправления',
+        'выдача в пункте получения',
+        'приём возврата',
+        'регистрация внешних повреждений'
+    ])[1 + i % 4],
+    (i - 1) % 10 + 1,
+    (i - 1) % 10 + 1,
+    tsrange(ts_beg::TIMESTAMP, ts_beg::TIMESTAMP + '1 hour'::INTERVAL * RANDOM())
 FROM (
     SELECT
-        RANDOM() * 10000 AS x,
-        RANDOM() * 10000 AS y
-    FROM generate_series(1, 1000000)
-) AS data;
+        i,
+        NOW() - RANDOM() * '3 year'::INTERVAL AS ts_beg
+    FROM generate_series(1, 1000000) AS i
+);
+
 
 
 CREATE PROCEDURE pg_temp.speed_test()
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    BEGIN
-        RAISE NOTICE 'Insert execution time: % ms',
-            pg_temp.query_execution_time($q$
-                INSERT INTO gist_data (area)
-                SELECT
-                    box(
-                        point(x, y),
-                        point(x + 10, y + 10)
-                    )
-                FROM (
-                    SELECT
-                        RANDOM() * 10000 AS x,
-                        RANDOM() * 10000 AS y
-                    FROM generate_series(1, 100000)
-                ) AS data;
-            $q$);
+BEGIN
+    RAISE NOTICE 'Insert execution time: % ms', pg_temp.query_execution_time($q$
+        INSERT INTO departures_operations
+        SELECT *
+        FROM departures_operations_data;
+    $q$);
 
-        RAISE NOTICE 'Update execution time: % ms',
-            pg_temp.query_execution_time($q$
-                UPDATE gist_data
-                SET area = box(
-                    point(0, 0),
-                    point(10, 10)
-                )
-                WHERE area <@ box(
-                    point(1000, 1000),
-    				point(1010, 1010)
-                );
-            $q$);
-
-        RAISE EXCEPTION '';
-    EXCEPTION WHEN OTHERS THEN
-        NULL;
-    END;
+    RAISE NOTICE 'Search execution time: % ms', pg_temp.query_execution_time($q$
+        SELECT COUNT(*)
+        FROM departures_operations d
+        WHERE tsrange('2025-01-01 00:00:00', '2025-01-01 00:10:00') @> d.period;
+    $q$);
+    
+    RAISE EXCEPTION '';
+EXCEPTION WHEN OTHERS THEN
+    NULL;
+END;
 END;
 $$;
 
@@ -83,9 +84,9 @@ RESET ROLE;
 
 CALL pg_temp.speed_test();
 
-CREATE INDEX index_gist_area
-ON gist_data
-USING GIST (area);
+CREATE INDEX departures_operations_index
+ON departures_operations
+USING GIST (period);
 
 CALL pg_temp.speed_test();
 

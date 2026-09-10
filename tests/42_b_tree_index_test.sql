@@ -74,11 +74,15 @@ RESET ROLE;
 
 CALL pg_temp.speed_test();
 
-CREATE INDEX index_postal_code ON ref.postal_objects(postal_code);
+CREATE INDEX index_postal_code
+ON ref.postal_objects(postal_code);
+
 CALL pg_temp.speed_test();
 
 DROP INDEX ref.index_postal_code;
-CREATE INDEX index_postal_code ON ref.postal_objects USING HASH (postal_code);
+CREATE INDEX index_postal_code
+ON ref.postal_objects USING HASH (postal_code);
+
 CALL pg_temp.speed_test();
 
 ROLLBACK;

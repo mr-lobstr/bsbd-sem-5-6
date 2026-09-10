@@ -6,7 +6,7 @@ services:
             context: .
             dockerfile: Dockerfile.db_builder
         volumes:
-            - db_storage:/var/lib/postgresql/data/18
+            - db_storage:/var/lib/postgresql/18/docker
         ports:
             - "15432:5432"
 

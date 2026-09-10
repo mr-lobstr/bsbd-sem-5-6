@@ -24,8 +24,6 @@ CREATE TEMP TABLE brin_data (
 );
 
 
--- 1 000 000 строк.
--- Физический порядок строк соответствует порядку created.
 INSERT INTO brin_data (created, value)
 SELECT
     TIMESTAMP '2020-01-01'
