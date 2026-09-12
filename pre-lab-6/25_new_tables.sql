@@ -66,7 +66,10 @@ CREATE TABLE app.dimensions (
     length_mm INTEGER NOT NULL,
     height_mm INTEGER,
     size_letters VARCHAR(3),
-    is_standard BOOLEAN NOT NULL DEFAULT FALSE
+    is_standard BOOLEAN NOT NULL DEFAULT FALSE,
+    segment_id INTEGER NOT NULL
+        DEFAULT (NULLIF(current_setting('app.segment_id'), ''))::INTEGER
+        REFERENCES ref.postal_objects
 );
 
 COMMENT ON TABLE app.dimensions
@@ -84,7 +87,10 @@ CREATE TABLE app.departures (
     sender_id INTEGER NOT NULL
         REFERENCES app.clients(id) ON DELETE RESTRICT,
     recipient_id INTEGER NOT NULL
-        REFERENCES app.clients(id) ON DELETE RESTRICT
+        REFERENCES app.clients(id) ON DELETE RESTRICT,
+    segment_id INTEGER NOT NULL
+        DEFAULT (NULLIF(current_setting('app.segment_id'), ''))::INTEGER
+        REFERENCES ref.postal_objects
 );
 
 COMMENT ON TABLE app.departures
@@ -101,7 +107,10 @@ CREATE TABLE app.delivery (
     receiving_method VARCHAR(20) NOT NULL CHECK (
         receiving_method IN ('самовывоз', 'курьером', 'почтальоном')
     ),
-    delivery_notes TEXT
+    notes TEXT,
+    segment_id INTEGER NOT NULL
+        DEFAULT (NULLIF(current_setting('app.segment_id'), ''))::INTEGER
+        REFERENCES ref.postal_objects
 );
 
 COMMENT ON TABLE app.delivery
@@ -116,7 +125,10 @@ CREATE TABLE app.orders (
         REFERENCES app.delivery(id),
     price NUMERIC(10, 2) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    closed_at TIMESTAMP
+    closed_at TIMESTAMP,
+    segment_id INTEGER NOT NULL
+        DEFAULT (NULLIF(current_setting('app.segment_id'), ''))::INTEGER
+        REFERENCES ref.postal_objects
 );
 
 COMMENT ON TABLE app.orders
@@ -128,7 +140,10 @@ CREATE TABLE app.status_history (
         REFERENCES app.departures(id) ON DELETE CASCADE,
     status_id INTEGER NOT NULL
         REFERENCES ref.statuses(id) ON DELETE CASCADE,
-    date TIMESTAMP NOT NULL DEFAULT NOW()
+    date TIMESTAMP NOT NULL DEFAULT NOW(),
+    segment_id INTEGER NOT NULL
+        DEFAULT (NULLIF(current_setting('app.segment_id'), ''))::INTEGER
+        REFERENCES ref.postal_objects
 );
 
 COMMENT ON TABLE app.status_history

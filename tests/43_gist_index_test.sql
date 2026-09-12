@@ -2,7 +2,7 @@ SET ROLE postgres;
 
 BEGIN;
 
-CREATE FUNCTION pg_temp.query_execution_time(query TEXT)
+CREATE FUNCTION query_execution_time(query TEXT)
 RETURNS REAL
 LANGUAGE plpgsql
 AS $$
@@ -55,18 +55,18 @@ FROM (
 
 
 
-CREATE PROCEDURE pg_temp.speed_test()
+CREATE PROCEDURE speed_test()
 LANGUAGE plpgsql
 AS $$
 BEGIN
 BEGIN
-    RAISE NOTICE 'Insert execution time: % ms', pg_temp.query_execution_time($q$
+    RAISE NOTICE 'Insert execution time: % ms', query_execution_time($q$
         INSERT INTO departures_operations
         SELECT *
         FROM departures_operations_data;
     $q$);
 
-    RAISE NOTICE 'Search execution time: % ms', pg_temp.query_execution_time($q$
+    RAISE NOTICE 'Search execution time: % ms', query_execution_time($q$
         SELECT COUNT(*)
         FROM departures_operations d
         WHERE tsrange('2025-01-01 00:00:00', '2025-01-01 00:10:00') @> d.period;
@@ -82,12 +82,12 @@ $$;
 
 RESET ROLE;
 
-CALL pg_temp.speed_test();
+CALL speed_test();
 
 CREATE INDEX departures_operations_index
 ON departures_operations
 USING GIST (period);
 
-CALL pg_temp.speed_test();
+CALL speed_test();
 
 ROLLBACK;

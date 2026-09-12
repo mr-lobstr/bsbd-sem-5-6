@@ -14,7 +14,8 @@ SELECT
     SUM(price) AS LTV
 FROM orders_with_client_info
 GROUP BY sender_id, name
-ORDER BY LTV DESC;
+ORDER BY LTV DESC
+LIMIT 50;
 
 
 WITH orders_with_client_info AS (

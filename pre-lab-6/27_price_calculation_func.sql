@@ -46,8 +46,6 @@ BEGIN
     ORDER BY bt.max_weight_grams DESC
     LIMIT 1;
 
-    RAISE NOTICE '%', price;
-
     additional_wieght := departure.weight_grams - base_weight;
 
     SELECT awt.step_weight_grams, awt.price

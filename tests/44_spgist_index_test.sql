@@ -2,7 +2,7 @@ SET ROLE postgres;
 
 BEGIN;
 
-CREATE FUNCTION pg_temp.query_execution_time(query TEXT)
+CREATE FUNCTION query_execution_time(query TEXT)
 RETURNS REAL
 LANGUAGE plpgsql
 AS $$
@@ -64,12 +64,12 @@ CROSS JOIN streets;
 TRUNCATE TABLE stg.raw_addresses CASCADE;
 
 
-CREATE PROCEDURE pg_temp.speed_test()
+CREATE PROCEDURE speed_test()
 LANGUAGE plpgsql
 AS $$
 BEGIN
 BEGIN
-    RAISE NOTICE 'Insert execution time: % ms', pg_temp.query_execution_time($q$
+    RAISE NOTICE 'Insert execution time: % ms', query_execution_time($q$
         INSERT INTO stg.raw_addresses (
 			system,
     		created_address_id,
@@ -79,7 +79,7 @@ BEGIN
         FROM raw_addresses_data;
     $q$);
 
-    RAISE NOTICE 'Search execution time: % ms', pg_temp.query_execution_time($q$
+    RAISE NOTICE 'Search execution time: % ms', query_execution_time($q$
         SELECT raw_text
         FROM stg.raw_addresses ra
         WHERE ra.raw_text LIKE 'Новосибирская обл., г. Новосибирск, ул. Октябрьская%';
@@ -95,12 +95,12 @@ $$;
 
 RESET ROLE;
 
-CALL pg_temp.speed_test();
+CALL speed_test();
 
 CREATE INDEX index_raw_addresses
 ON stg.raw_addresses
 USING SPGIST (raw_text);
 
-CALL pg_temp.speed_test();
+CALL speed_test();
 
 ROLLBACK;

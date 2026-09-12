@@ -36,9 +36,7 @@ BEGIN
             'flat', anon.hash(OLD.flat::TEXT),
             'floor', OLD.floor,
             'entrance', OLD.entrance,
-            'has_mailbox', OLD.has_mailbox,
-            'intercom_code', anon.hash(OLD.intercom_code::TEXT),
-            'delivery_notes', anon.hash(OLD.delivery_notes)
+            'has_mailbox', OLD.has_mailbox
         );
     END IF;
 
@@ -49,9 +47,7 @@ BEGIN
             'flat', anon.hash(NEW.flat::TEXT),
             'floor', NEW.floor,
             'entrance', NEW.entrance,
-            'has_mailbox', NEW.has_mailbox,
-            'intercom_code', anon.hash(NEW.intercom_code::TEXT),
-            'delivery_notes', anon.hash(NEW.delivery_notes)
+            'has_mailbox', NEW.has_mailbox
         );
     END IF;
 

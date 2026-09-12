@@ -20,6 +20,7 @@ CREATE POLICY dimensions_select_rls
 ON app.dimensions
 FOR SELECT
 USING (
+    is_standard OR
     segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
 );
 
@@ -27,6 +28,7 @@ CREATE POLICY dimensions_insert_rls
 ON app.dimensions
 FOR INSERT
 WITH CHECK (
+    is_standard OR
     segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
 );
 
@@ -34,9 +36,11 @@ CREATE POLICY dimensions_update_rls
 ON app.dimensions
 FOR UPDATE
 USING (
+    is_standard OR
     segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
 )
 WITH CHECK (
+    is_standard OR
     segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
 );
 
@@ -44,6 +48,7 @@ CREATE POLICY dimensions_delete_rls
 ON app.dimensions
 FOR DELETE
 USING (
+    is_standard OR
     segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
 );
 

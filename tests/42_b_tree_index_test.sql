@@ -2,7 +2,7 @@ SET ROLE postgres;
 
 BEGIN;
 
-CREATE FUNCTION pg_temp.query_execution_time(query TEXT)
+CREATE FUNCTION query_execution_time(query TEXT)
 RETURNS REAL
 LANGUAGE plpgsql
 AS $$
@@ -36,12 +36,12 @@ SELECT
 FROM generate_series(1, 1000000) AS i;
 
 
-CREATE PROCEDURE pg_temp.speed_test()
+CREATE PROCEDURE speed_test()
 LANGUAGE plpgsql
 AS $$
 BEGIN
 BEGIN
-	RAISE NOTICE 'Insert execution time: % ms', pg_temp.query_execution_time($q$
+	RAISE NOTICE 'Insert execution time: % ms', query_execution_time($q$
         INSERT INTO ref.postal_objects(
 			type,
 			address_id,
@@ -51,13 +51,13 @@ BEGIN
         FROM postal_objects_data;
     $q$);
 
-	RAISE NOTICE 'Update execution time: % ms', pg_temp.query_execution_time($q$
+	RAISE NOTICE 'Update execution time: % ms', query_execution_time($q$
         UPDATE ref.postal_objects
 		SET postal_code = '000000'
 		WHERE postal_code = '123456';		
     $q$);
 
-	RAISE NOTICE 'Sort execution time: % ms', pg_temp.query_execution_time($q$
+	RAISE NOTICE 'Sort execution time: % ms', query_execution_time($q$
         SELECT postal_code
 		FROM ref.postal_objects
 		ORDER BY postal_code;		
@@ -72,17 +72,17 @@ $$;
 
 RESET ROLE;
 
-CALL pg_temp.speed_test();
+CALL speed_test();
 
 CREATE INDEX index_postal_code
 ON ref.postal_objects(postal_code);
 
-CALL pg_temp.speed_test();
+CALL speed_test();
 
 DROP INDEX ref.index_postal_code;
 CREATE INDEX index_postal_code
 ON ref.postal_objects USING HASH (postal_code);
 
-CALL pg_temp.speed_test();
+CALL speed_test();
 
 ROLLBACK;
