@@ -21,7 +21,7 @@ ON app.dimensions
 FOR SELECT
 USING (
     is_standard OR
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY dimensions_insert_rls
@@ -29,7 +29,7 @@ ON app.dimensions
 FOR INSERT
 WITH CHECK (
     is_standard OR
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY dimensions_update_rls
@@ -37,11 +37,11 @@ ON app.dimensions
 FOR UPDATE
 USING (
     is_standard OR
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 )
 WITH CHECK (
     is_standard OR
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY dimensions_delete_rls
@@ -49,7 +49,7 @@ ON app.dimensions
 FOR DELETE
 USING (
     is_standard OR
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 
@@ -57,31 +57,31 @@ CREATE POLICY departures_select_rls
 ON app.departures
 FOR SELECT
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY departures_insert_rls
 ON app.departures
 FOR INSERT
 WITH CHECK (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY departures_update_rls
 ON app.departures
 FOR UPDATE
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 )
 WITH CHECK (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY departures_delete_rls
 ON app.departures
 FOR DELETE
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 
@@ -89,31 +89,31 @@ CREATE POLICY delivery_select_rls
 ON app.delivery
 FOR SELECT
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY delivery_insert_rls
 ON app.delivery
 FOR INSERT
 WITH CHECK (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY delivery_update_rls
 ON app.delivery
 FOR UPDATE
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 )
 WITH CHECK (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY delivery_delete_rls
 ON app.delivery
 FOR DELETE
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 
@@ -121,31 +121,31 @@ CREATE POLICY status_history_select_rls
 ON app.status_history
 FOR SELECT
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY status_history_insert_rls
 ON app.status_history
 FOR INSERT
 WITH CHECK (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY status_history_update_rls
 ON app.status_history
 FOR UPDATE
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 )
 WITH CHECK (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY status_history_delete_rls
 ON app.status_history
 FOR DELETE
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 
@@ -153,31 +153,31 @@ CREATE POLICY orders_select_rls
 ON app.orders
 FOR SELECT
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY orders_insert_rls
 ON app.orders
 FOR INSERT
 WITH CHECK (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY orders_update_rls
 ON app.orders
 FOR UPDATE
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 )
 WITH CHECK (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 CREATE POLICY orders_delete_rls
 ON app.orders
 FOR DELETE
 USING (
-    segment_id = NULLIF(current_setting('app.segment_id'), '')::INTEGER
+    segment_id = app.get_segment_id()
 );
 
 RESET ROLE;

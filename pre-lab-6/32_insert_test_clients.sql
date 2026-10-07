@@ -72,8 +72,8 @@ SELECT
     middle_name,
     row_number() OVER (),
     1 + RANDOM() * 9
-FROM names
-CROSS JOIN surnames
+FROM surnames
+CROSS JOIN names
 CROSS JOIN middle_names;
 
 RESET ROLE;

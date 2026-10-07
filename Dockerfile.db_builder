@@ -15,3 +15,5 @@ COPY ./rgr-5 /docker-entrypoint-initdb.d/
 
 COPY ./pre-lab-6 /docker-entrypoint-initdb.d/
 COPY ./lab-6 /docker-entrypoint-initdb.d/
+COPY ./lab-7 /docker-entrypoint-initdb.d/
+COPY ./lab-8 /docker-entrypoint-initdb.d/

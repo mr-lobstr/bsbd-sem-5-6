@@ -1,60 +1,49 @@
 SET ROLE app_owner;
 
-CREATE FUNCTION app.price_calculation(_departure_id INTEGER, _delivery_id INTEGER)
+
+CREATE FUNCTION app.price_calc(
+    _departure_id INTEGER,
+    _delivery_id INTEGER
+)
 RETURNS NUMERIC(10, 2)
 LANGUAGE plpgsql
 AS $$
     DECLARE
-        departure RECORD;
-        route_id_ INTEGER;
-
-        price NUMERIC(10, 2);
-        base_weight INTEGER;
-        
-        additional_wieght INTEGER;
-        additional_price NUMERIC(10, 2);
-        step_weight INTEGER;
+        r RECORD;
+        additional_weight INTEGER;
+        weight_steps NUMERIC(10, 2);
 BEGIN
-    SELECT *
-    INTO departure
-    FROM app.departures d
-    WHERE d.id = _departure_id;
+    SELECT
+        t.*,
+        dp.*
+    INTO r
+    FROM ref.tariffs t
+    JOIN app.departures dp
+        ON dp.id = _departure_id
+    JOIN app.delivery d
+        ON d.id = _delivery_id
+    WHERE t.departure_type_id = dp.type_id
+        AND t.route_id = d.route_id;
 
-    SELECT dp.route_id
-    INTO route_id_
-    FROM app.delivery dp
-    WHERE dp.id = _delivery_id; 
-
-    SELECT bt.price
-    INTO price
-    FROM ref.base_tariffs bt
-    WHERE bt.departure_type_id = departure.type_id
-        AND bt.route_id = route_id_
-        AND bt.max_weight_grams >= departure.weight_grams
-    ORDER BY bt.max_weight_grams ASC
-    LIMIT 1;
-
-    IF NOT price IS NULL THEN
-        RETURN price;
+    IF r IS NULL
+    THEN
+        RAISE EXCEPTION 'Тариф для отправления (id=%) не найден', _departure_id;
     END IF;
 
-    SELECT bt.price, bt.max_weight_grams
-    INTO price, base_weight
-    FROM ref.base_tariffs bt
-    WHERE bt.departure_type_id = departure.type_id
-        AND bt.route_id = route_id_
-    ORDER BY bt.max_weight_grams DESC
-    LIMIT 1;
+    IF r.weight_g <= r.weight_limit_1_g
+    THEN
+        RETURN r.price_1;
+    END IF;
 
-    additional_wieght := departure.weight_grams - base_weight;
+    IF r.weight_g <= r.weight_limit_2_g
+    THEN
+        RETURN r.price_2;
+    END IF;
 
-    SELECT awt.step_weight_grams, awt.price
-    INTO step_weight, additional_price
-    FROM ref.additional_weight_tariffs awt
-    WHERE awt.departure_type_id = departure.type_id
-        AND awt.route_id = route_id_;
+    additional_weight := r.weight_g - r.weight_limit_2_g;
+    weight_steps := (additional_weight / r.additional_weight_g)::INTEGER + 1;
 
-    RETURN price + (additional_wieght / step_weight + 1)::INTEGER * additional_price;
+    RETURN r.price_2 + weight_steps * r.price_3;
 END;
 $$;
 

@@ -8,11 +8,11 @@ CREATE TABLE app.orders_partition (
         REFERENCES app.delivery(id),
     price NUMERIC(10, 2) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    paid_at TIMESTAMP,
     closed_at TIMESTAMP,
     segment_id INTEGER NOT NULL
-        DEFAULT (NULLIF(current_setting('app.segment_id'), ''))::INTEGER
         REFERENCES ref.postal_objects
-) PARTITION BY RANGE (created_at);
+) PARTITION BY RANGE (paid_at);
 
 COMMENT ON TABLE app.orders_partition
 IS 'История заказов с декларативным секционирование по диапазону';
@@ -33,7 +33,7 @@ PARTITION OF app.orders_partition
 DEFAULT;
 
 COMMENT ON TABLE app.orders_partition_archive
-IS 'Заказы за предыдущие годы/месяцы';
+IS 'Заказы за предыдущие месяцы/годы';
 
 
 SET ROLE postgres;

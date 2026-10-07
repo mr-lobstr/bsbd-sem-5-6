@@ -9,6 +9,11 @@ services:
             - db_storage:/var/lib/postgresql/18/docker
         ports:
             - "15432:5432"
+        # command: |
+        #     sh -c "
+        #         docker-entrypoint.sh postgres \
+        #         && ln -s /docker-entrypoint-initdb.d/gpg_keys /var/lib/postgresql/18/docker/gpg_keys
+        #     "
 
 volumes:
     db_storage:

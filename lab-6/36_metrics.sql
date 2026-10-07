@@ -12,8 +12,8 @@ SELECT
     sender_id,
     name,
     SUM(price) AS LTV
-FROM orders_with_client_info
-GROUP BY sender_id, name
+FROM orders_with_client_info o
+GROUP BY o.sender_id, name
 ORDER BY LTV DESC
 LIMIT 50;
 
@@ -32,8 +32,8 @@ SELECT
     sender_id,
     name,
     (SUM(price)/COUNT(price))::NUMERIC(10, 2) AS AOV
-FROM orders_with_client_info
-GROUP BY sender_id, name
+FROM orders_with_client_info o
+GROUP BY o.sender_id, name
 ORDER BY AOV DESC
 LIMIT 5;
 
@@ -51,7 +51,7 @@ WITH active_clients_count AS (
     SELECT
         SUM(op.price) AS rev
     FROM app.orders_partition op
-    WHERE NOW() - '1 month'::INTERVAL <= op.created_at AND op.created_at < NOW()
+    WHERE NOW() - '1 month'::INTERVAL <= op.paid_at AND op.paid_at < NOW()
 )
 SELECT (rev / cnt)::NUMERIC(10, 2) AS ARPU
 FROM active_clients_count
@@ -61,7 +61,7 @@ JOIN revenue_for_month ON TRUE;
 WITH orders_for_month AS (
     SELECT *
     FROM app.orders_partition op
-    WHERE NOW() - '1 month'::INTERVAL <= op.created_at AND op.created_at < NOW()
+    WHERE NOW() - '1 month'::INTERVAL <= op.paid_at AND op.paid_at < NOW()
 ), revenue_for_month AS (
 	SELECT
         SUM(price) AS rev
@@ -81,7 +81,7 @@ JOIN payng_clients_count ON TRUE;
 WITH orders_for_month AS (
 	SELECT *
 	FROM app.orders_partition op
-	WHERE NOW() - '1 month'::INTERVAL <= op.created_at AND op.created_at < NOW()
+	WHERE NOW() - '1 month'::INTERVAL <= op.paid_at AND op.paid_at < NOW()
 ), departures_types_and_counts AS (
 	SELECT
 		COUNT(*) AS cnt,

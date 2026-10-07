@@ -23,7 +23,7 @@ FROM generate_series(1, 10000) i;
 INSERT INTO app.departures (
     type_id,
     dimension_id,
-    weight_grams,
+    weight_g,
     declared_value,
     sender_id,
     recipient_id,
@@ -34,7 +34,7 @@ INSERT INTO app.departures (
         WHEN dp.type = 'письмо' THEN 4 + RANDOM() * 10
         ELSE 1 + RANDOM() * 49
     END,
-    1 + (dp.max_weight_grams - 1) * RANDOM(),
+    1 + (dp.max_weight_g - 1) * RANDOM(),
     CASE
         WHEN dp.subtype LIKE 'ценн%' THEN 1000 * RANDOM()
         ELSE NULL
@@ -50,17 +50,28 @@ INSERT INTO app.orders (
     departure_id,
     delivery_id,
     created_at,
+    paid_at,
     closed_at,
     segment_id
 ) SELECT
     i,
     i,
     created,
-    created + '15 day'::INTERVAL + '2 month'::INTERVAL * RANDOM(),
+    CASE
+        WHEN paid_and_closed
+        THEN created + '15 day'::INTERVAL * RANDOM()
+        ELSE NULL
+    END,
+    CASE
+        WHEN paid_and_closed
+        THEN created + '15 day'::INTERVAL + '2 month'::INTERVAL * RANDOM()
+        ELSE NULL
+    END,
     RANDOM() * 9 + 1
 FROM (
     SELECT
         i,
+        RANDOM() < 0.5 AS paid_and_closed,
         NOW() - (NOW() - '2023-01-01'::DATE) * RANDOM() AS created
     FROM generate_series(1, 10000) i
 );

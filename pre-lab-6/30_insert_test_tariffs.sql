@@ -1,8 +1,12 @@
-INSERT INTO ref.base_tariffs (
+INSERT INTO ref.tariffs (
     departure_type_id,
     route_id,
-    max_weight_grams,
-    price
+    weight_limit_1_g,
+    price_1,
+    weight_limit_2_g,
+    price_2,
+    additional_weight_g,
+    price_3
 ) SELECT
 	dt.id,
 	r.id,
@@ -10,36 +14,12 @@ INSERT INTO ref.base_tariffs (
         WHEN dt.type = 'письмо' THEN 20
         ELSE 500
     END,
-	10 + 17 * dt.id * RANDOM()
-FROM ref.departure_types dt
-CROSS JOIN ref.routes r;
-
-
-INSERT INTO ref.base_tariffs (
-    departure_type_id,
-    route_id,
-    max_weight_grams,
-    price
-) SELECT
-	dt.id,
-	r.id,
+	26 * dt.id + 17 * RANDOM(),
     CASE
         WHEN dt.type = 'письмо' THEN 90
         ELSE 1000
     END,
-	10 + 26 * dt.id  * RANDOM()
-FROM ref.departure_types dt
-CROSS JOIN ref.routes r;
-
-
-INSERT INTO ref.additional_weight_tariffs (
-    departure_type_id,
-    route_id,
-    step_weight_grams,
-    price
-) SELECT
-	dt.id,
-	r.id,
+	26 * dt.id + 9 * RANDOM() + 17,
     CASE
         WHEN dt.type = 'письмо' THEN 20
         ELSE 500
