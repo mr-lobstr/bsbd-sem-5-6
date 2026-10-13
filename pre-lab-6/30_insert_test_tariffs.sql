@@ -7,7 +7,8 @@ INSERT INTO ref.tariffs (
     price_2,
     additional_weight_g,
     price_3
-) SELECT
+)
+SELECT
 	dt.id,
 	r.id,
     CASE

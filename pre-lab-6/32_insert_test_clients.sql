@@ -48,7 +48,7 @@ WITH names AS (
     UNION ALL SELECT 'Морозов'
     UNION ALL SELECT 'Волков'
 ), middle_names AS (
-    SELECT 'Михаил' AS middle_name
+    SELECT 'Михайлович' AS middle_name
     UNION ALL SELECT 'Николаевич'
     UNION ALL SELECT 'Александрович'
     UNION ALL SELECT 'Григорьевич'

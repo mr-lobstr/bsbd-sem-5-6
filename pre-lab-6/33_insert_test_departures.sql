@@ -5,7 +5,8 @@ INSERT INTO app.delivery (
     departure_method,
     receiving_method,
     segment_id
-) SELECT
+)
+SELECT
     RANDOM() * 9 + 1,
     (ARRAY[
         'из отделения',
@@ -28,7 +29,8 @@ INSERT INTO app.departures (
     sender_id,
     recipient_id,
     segment_id
-) SELECT
+)
+SELECT
     (i - 1) % 10 + 1,
     CASE
         WHEN dp.type = 'письмо' THEN 4 + RANDOM() * 10
@@ -43,7 +45,8 @@ INSERT INTO app.departures (
     RANDOM() * 999 + 1,
     RANDOM() * 9 + 1
 FROM generate_series(1, 10000) i
-JOIN ref.departure_types dp ON dp.id = (i - 1) % 10 + 1;
+JOIN ref.departure_types dp
+    ON dp.id = (i - 1) % 10 + 1;
 
 
 INSERT INTO app.orders (
@@ -53,18 +56,19 @@ INSERT INTO app.orders (
     paid_at,
     closed_at,
     segment_id
-) SELECT
+)
+SELECT
     i,
     i,
     created,
     CASE
         WHEN paid_and_closed
-        THEN created + '15 day'::INTERVAL * RANDOM()
+        THEN created + '15 d'::INTERVAL * RANDOM()
         ELSE NULL
     END,
     CASE
         WHEN paid_and_closed
-        THEN created + '15 day'::INTERVAL + '2 month'::INTERVAL * RANDOM()
+        THEN created + '15 d'::INTERVAL + '2 mon'::INTERVAL * RANDOM()
         ELSE NULL
     END,
     RANDOM() * 9 + 1

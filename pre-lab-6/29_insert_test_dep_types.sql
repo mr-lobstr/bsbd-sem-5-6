@@ -3,7 +3,8 @@ INSERT INTO ref.departure_types (
     subtype,
     max_weight_g,
     description
-) VALUES (
+)
+VALUES (
     'письмо',
     NULL,
     200,
@@ -13,7 +14,7 @@ INSERT INTO ref.departure_types (
     'письмо',
     'заказное',
     200,
-    'На территории РФ заказное письмо вручается адресату
+    'Заказное письмо вручается адресату
     под подпись лично или представителю адресата по доверенности'
 ), (
     'письмо',
