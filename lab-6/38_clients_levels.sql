@@ -10,7 +10,7 @@ CREATE TABLE ref.client_levels (
         NOT NULL,
     discount NUMERIC(5, 2)
         NOT NULL
-        CHECK (0 < discount AND discount < 1)
+        CHECK (0 <= discount AND discount < 1)
 );
 
 SET ROLE postgres;
