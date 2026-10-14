@@ -1,17 +1,17 @@
-WITH closed_orders AS (
+WITH paid_orders AS (
 	SELECT
 		op.departure_id,
 		op.price
 	FROM app.orders_partition op
-	WHERE op.closed_at IS NOT NULL
+	WHERE op.paid_at IS NOT NULL
 )
 SELECT
     d.sender_id,
     c.name,
-    SUM(co.price) AS LTV
-FROM closed_orders co
+    SUM(po.price) AS LTV
+FROM paid_orders po
 JOIN app.departures d
-    ON d.id = co.departure_id
+    ON d.id = po.departure_id
 JOIN app.clients c
     ON c.id = d.sender_id
 GROUP BY
@@ -21,20 +21,19 @@ ORDER BY LTV DESC
 LIMIT 5;
 
 
-WITH closed_orders AS (
+WITH paid_orders AS (
 	SELECT
 		op.departure_id,
 		op.price
 	FROM app.orders_partition op
-	WHERE op.closed_at IS NOT NULL
 )
 SELECT
     d.sender_id,
     c.name,
-    ROUND(AVG(co.price), 2) AS AOV
-FROM closed_orders co
+    ROUND(AVG(po.price), 2) AS AOV
+FROM paid_orders po
 JOIN app.departures d
-    ON d.id = co.departure_id
+    ON d.id = po.departure_id
 JOIN app.clients c
 	ON c.id = d.sender_id
 GROUP BY
@@ -60,7 +59,6 @@ WITH date_range AS (
         date_range dr
     WHERE dr.beg <= op.paid_at
         AND op.paid_at < dr.end
-		AND op.closed_at IS NOT NULL
 )
 SELECT ROUND(sp.price/ac.cnt, 2) AS ARPU
 FROM
