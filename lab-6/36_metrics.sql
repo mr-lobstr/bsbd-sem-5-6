@@ -1,124 +1,111 @@
-WITH orders_with_client_info AS (
-    SELECT
-        d.sender_id,
-        c.name,
-        op.price
-    FROM app.orders_partition op
-    JOIN app.departures d
-        ON d.id = op.departure_id
-    JOIN app.clients c
-        ON c.id = sender_id
-    WHERE op.closed_at IS NOT NULL
+WITH closed_orders AS (
+	SELECT
+		op.departure_id,
+		op.price
+	FROM app.orders_partition op
+	WHERE op.closed_at IS NOT NULL
 )
 SELECT
-    o.sender_id,
-    o.name,
-    SUM(o.price) AS LTV
-FROM orders_with_client_info o
+    d.sender_id,
+    c.name,
+    SUM(co.price) AS LTV
+FROM closed_orders co
+JOIN app.departures d
+    ON d.id = co.departure_id
+JOIN app.clients c
+    ON c.id = d.sender_id
 GROUP BY
-    o.sender_id,
-    o.name
+    d.sender_id,
+    c.name
 ORDER BY LTV DESC
-LIMIT 50;
+LIMIT 5;
 
 
-WITH orders_with_client_info AS (
-    SELECT
-        d.sender_id,
-        c.name,
-        op.price
-    FROM app.orders_partition op
-    JOIN app.departures d
-        ON d.id = op.departure_id
-    JOIN app.clients c
-        ON c.id = d.sender_id
-    WHERE op.closed_at IS NOT NULL
+WITH closed_orders AS (
+	SELECT
+		op.departure_id,
+		op.price
+	FROM app.orders_partition op
+	WHERE op.closed_at IS NOT NULL
 )
 SELECT
-    o.sender_id,
-    o.name,
-    ROUND(AVG(o.price), 2) AS AOV
-FROM orders_with_client_info o
+    d.sender_id,
+    c.name,
+    ROUND(AVG(co.price), 2) AS AOV
+FROM closed_orders co
+JOIN app.departures d
+    ON d.id = co.departure_id
+JOIN app.clients c
+	ON c.id = d.sender_id
 GROUP BY
-    o.sender_id,
-    o.name
+    d.sender_id,
+    c.name
 ORDER BY AOV DESC
 LIMIT 5;
 
 
-WITH active_clients_count AS (
-    SELECT COUNT(*) AS cnt
-    FROM app.clients c
-    WHERE EXISTS (
-		SELECT 1
-		FROM app.orders_partition op
-		JOIN app.departures d
-            ON d.id = op.departure_id
-		WHERE d.sender_id = c.id
-	)
-), date_range AS (
-    SELECT
-        DATE_TRUNC('month', NOW()) AS beg,
-        DATE_TRUNC('month', NOW()) + '1 mon'::INTERVAL AS end
-), revenue_for_month AS (
-    SELECT SUM(op.price) AS rev
-    FROM
-        app.orders_partition op,
-        date_range dr
-    WHERE dr.beg <= op.paid_at
-        AND op.paid_at < dr.end
-)
-SELECT (rev/cnt)::NUMERIC(10, 2) AS ARPU
-FROM
-    active_clients_count,
-    revenue_for_month;
-
-
 WITH date_range AS (
     SELECT
         DATE_TRUNC('month', NOW()) AS beg,
         DATE_TRUNC('month', NOW()) + '1 mon'::INTERVAL AS end
-), orders_for_month AS (
-    SELECT *
-    FROM
-        app.orders_partition op,
-        date_range dr
-    WHERE dr.beg <= op.paid_at
-        AND op.paid_at < dr.end
-), revenue_for_month AS (
-	SELECT SUM(price) AS rev
-	FROM orders_for_month
-), payng_clients_count AS (
-	SELECT COUNT(DISTINCT d.sender_id) AS cnt
-	FROM orders_for_month o
+), active_clients AS (
+	SELECT NULLIF(COUNT(DISTINCT d.sender_id), 0) AS cnt
+	FROM app.orders_partition op
 	JOIN app.departures d
-        ON d.id = o.departure_id
+    	ON d.id = op.departure_id
+),sum_price_for_month AS (
+    SELECT SUM(op.price) AS price
+    FROM
+        app.orders_partition op,
+        date_range dr
+    WHERE dr.beg <= op.paid_at
+        AND op.paid_at < dr.end
+		AND op.closed_at IS NOT NULL
 )
-SELECT (rev/cnt)::NUMERIC(10, 2) AS ARPPU
+SELECT ROUND(sp.price/ac.cnt, 2) AS ARPU
 FROM
-    revenue_for_month,
-    payng_clients_count;
+    active_clients ac,
+    sum_price_for_month sp;
 
 
-EXPLAIN (ANALYZE)
+EXPLAIN(ANALYZE, FORMAT JSON)
 WITH date_range AS (
     SELECT
         DATE_TRUNC('month', NOW()) AS beg,
         DATE_TRUNC('month', NOW()) + '1 mon'::INTERVAL AS end
-), orders_for_month AS (
-	SELECT *
-	FROM
-        app.orders_partition op,
-        date_range dr
+), price_and_count AS (
+	SELECT
+		SUM(op.price) AS price,
+		NULLIF(COUNT(DISTINCT d.sender_id), 0) AS cnt
+	FROM app.orders_partition op
+	JOIN app.departures d
+		ON d.id = op.departure_id
+	JOIN date_range dr
+		ON TRUE
 	WHERE dr.beg <= op.paid_at
-        AND op.paid_at < dr.end
+		AND op.paid_at < dr.end
+		AND op.closed_at IS NOT NULL
+)
+SELECT ROUND(pc.price/pc.cnt, 2) AS ARPPU
+FROM price_and_count pc;
+
+
+WITH date_range AS (
+    SELECT
+        DATE_TRUNC('month', NOW()) AS beg,
+        DATE_TRUNC('month', NOW()) + '1 mon'::INTERVAL AS end
 ), departures_types_and_counts AS (
 	SELECT
 		COUNT(*) AS cnt,
 		d.type_id
-	FROM orders_for_month o
+	FROM app.orders_partition op
 	JOIN app.departures d
-        ON d.id = o.departure_id
+        ON d.id = op.departure_id
+	JOIN date_range dr
+		ON TRUE
+	WHERE dr.beg <= op.paid_at
+        AND op.paid_at < dr.end
+		AND op.closed_at IS NOT NULL
 	GROUP BY d.type_id
 )
 SELECT
@@ -129,5 +116,5 @@ SELECT
 FROM departures_types_and_counts d
 JOIN ref.departure_types dt
     ON dt.id = d.type_id
-ORDER BY cnt DESC
+ORDER BY cnt ASC
 LIMIT 3;
