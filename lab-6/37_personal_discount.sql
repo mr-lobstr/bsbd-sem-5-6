@@ -11,7 +11,7 @@ CREATE TABLE app.temporary_personal_discount (
         NOT NULL
         REFERENCES ref.departure_types(id)
             ON DELETE CASCADE,
-    discount REAL
+    discount NUMERIC(5, 2)
         NOT NULL
         CHECK (0 < discount AND discount < 1),
     valid_until DATE
