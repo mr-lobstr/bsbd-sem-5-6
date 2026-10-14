@@ -7,7 +7,7 @@ CREATE TABLE app.discounts_for_unpopular_products (
         NOT NULL
         REFERENCES ref.departure_types(id)
             ON DELETE CASCADE,
-    discount NUMERIC(5, 2)
+    discount NUMERIC(5, 4)
         NOT NULL
         CHECK (0 < discount AND discount < 1),
     valid_until DATE

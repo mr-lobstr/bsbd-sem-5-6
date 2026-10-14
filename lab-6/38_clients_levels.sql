@@ -8,7 +8,7 @@ CREATE TABLE ref.client_levels (
         UNIQUE,
     min_ltv NUMERIC(10, 2)
         NOT NULL,
-    discount NUMERIC(5, 2)
+    discount NUMERIC(5, 4)
         NOT NULL
         CHECK (0 <= discount AND discount < 1)
 );
