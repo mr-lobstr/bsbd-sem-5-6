@@ -21,6 +21,8 @@ CREATE TABLE app.temporary_personal_discount (
 );
 
 
+SELECT app.set_session_ctx(1, 1);
+
 WITH date_range AS (
     SELECT
         DATE_TRUNC('month', NOW()) AS beg,
