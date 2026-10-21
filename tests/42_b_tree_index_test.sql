@@ -2,7 +2,7 @@ SET ROLE postgres;
 
 BEGIN;
 
-CREATE FUNCTION query_execution_time(query TEXT)
+CREATE FUNCTION query_execution_time(query TEXT, f BOOLEAN DEFAULT FALSE)
 RETURNS REAL
 LANGUAGE plpgsql
 AS $$
@@ -10,6 +10,10 @@ AS $$
 BEGIN
     EXECUTE 'EXPLAIN (ANALYZE, FORMAT JSON) ' || query
     INTO plan;
+
+	IF f THEN
+		RAISE NOTICE '%', plan;
+	END IF;
     RETURN plan->0->>'Execution Time';
 END;
 $$;
@@ -36,12 +40,14 @@ SELECT
 FROM generate_series(1, 1000000) AS i;
 
 
-CREATE PROCEDURE speed_test()
+CREATE PROCEDURE speed_test(title TEXT)
 LANGUAGE plpgsql
 AS $$
 BEGIN
 BEGIN
-	RAISE NOTICE 'Insert execution time: % ms', query_execution_time($q$
+	RAISE NOTICE '%', title;
+
+	RAISE NOTICE 'Вставка данных: % ms', query_execution_time($q$
         INSERT INTO ref.postal_objects(
 			type,
 			address_id,
@@ -51,18 +57,31 @@ BEGIN
         FROM postal_objects_data;
     $q$);
 
-	RAISE NOTICE 'Update execution time: % ms', query_execution_time($q$
-        UPDATE ref.postal_objects
+	RAISE NOTICE 'Условие на равенство: % ms', query_execution_time($q$
+        UPDATE ref.postal_objects po
 		SET postal_code = '000000'
-		WHERE postal_code = '123456';		
+		WHERE po.postal_code = '123456';		
     $q$);
 
-	RAISE NOTICE 'Sort execution time: % ms', query_execution_time($q$
+	RAISE NOTICE 'Префиксный поиск: % ms', query_execution_time($q$
         SELECT postal_code
-		FROM ref.postal_objects
-		ORDER BY postal_code;		
+		FROM ref.postal_objects po
+		WHERE po.postal_code LIKE '123%';		
     $q$);
 
+	RAISE NOTICE 'Оператор BETWEEN: % ms', query_execution_time($q$
+        SELECT postal_code
+		FROM ref.postal_objects po
+		WHERE po.postal_code BETWEEN '444444' AND '444454';		
+    $q$);
+
+	RAISE NOTICE 'Сортировка: % ms', query_execution_time($q$
+        SELECT postal_code
+		FROM ref.postal_objects po
+		ORDER BY po.postal_code;		
+    $q$);
+
+	RAISE NOTICE '';
 	RAISE EXCEPTION '';
 EXCEPTION WHEN OTHERS THEN
 	NULL;
@@ -72,17 +91,18 @@ $$;
 
 RESET ROLE;
 
-CALL speed_test();
+CALL speed_test('Без индекса');
 
 CREATE INDEX index_postal_code
 ON ref.postal_objects(postal_code);
 
-CALL speed_test();
+CALL speed_test('B-Tree');
 
 DROP INDEX ref.index_postal_code;
 CREATE INDEX index_postal_code
-ON ref.postal_objects USING HASH (postal_code);
+ON ref.postal_objects
+USING HASH (postal_code);
 
-CALL speed_test();
+CALL speed_test('Hash');
 
 ROLLBACK;
