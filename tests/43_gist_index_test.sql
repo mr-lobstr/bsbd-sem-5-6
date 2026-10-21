@@ -2,18 +2,16 @@ SET ROLE postgres;
 
 BEGIN;
 
-CREATE FUNCTION query_execution_time(query TEXT)
+CREATE FUNCTION query_execution_time(query TEXT, f BOOLEAN DEFAULT FALSE)
 RETURNS REAL
 LANGUAGE plpgsql
 AS $$
-    DECLARE
-        plan JSONB;
-    BEGIN
-        EXECUTE 'EXPLAIN (ANALYZE, FORMAT JSON) ' || query
-        INTO plan;
-
-        RETURN plan->0->>'Execution Time';
-    END;
+    DECLARE plan JSONB;
+BEGIN
+    EXECUTE 'EXPLAIN (ANALYZE, FORMAT JSON) ' || query
+    INTO plan;
+    RETURN plan->0->>'Execution Time';
+END;
 $$;
 
 
@@ -45,49 +43,64 @@ SELECT
     ])[1 + i % 4],
     (i - 1) % 10 + 1,
     (i - 1) % 10 + 1,
-    tsrange(ts_beg::TIMESTAMP, ts_beg::TIMESTAMP + '1 hour'::INTERVAL * RANDOM())
+    tsrange(ts_beg, ts_beg + '1 h'::INTERVAL * RANDOM())
 FROM (
     SELECT
         i,
-        NOW() - RANDOM() * '3 year'::INTERVAL AS ts_beg
+        (
+			NOW() - RANDOM() * '3 y'::INTERVAL
+		)::TIMESTAMP AS ts_beg
     FROM generate_series(1, 1000000) AS i
 );
 
 
-
-CREATE PROCEDURE speed_test()
+CREATE PROCEDURE speed_test(title TEXT)
 LANGUAGE plpgsql
 AS $$
 BEGIN
 BEGIN
-    RAISE NOTICE 'Insert execution time: % ms', query_execution_time($q$
+	RAISE NOTICE '%', title;
+
+	RAISE NOTICE 'Вставка данных: % ms', query_execution_time($q$
         INSERT INTO departures_operations
         SELECT *
         FROM departures_operations_data;
     $q$);
 
-    RAISE NOTICE 'Search execution time: % ms', query_execution_time($q$
+    RAISE NOTICE 'Поиск полных вложений: % ms', query_execution_time($q$
         SELECT COUNT(*)
         FROM departures_operations d
-        WHERE tsrange('2025-01-01 00:00:00', '2025-01-01 00:10:00') @> d.period;
+        WHERE tsrange(
+			'2025-01-01 00:00:00',
+			'2025-01-01 00:10:00'
+		) @> d.period;
     $q$);
-    
-    RAISE EXCEPTION '';
+
+	RAISE NOTICE 'Поиск пересечейний: % ms', query_execution_time($q$
+        SELECT COUNT(*)
+        FROM departures_operations d
+        WHERE tsrange(
+			'2025-01-01 00:00:00',
+			'2025-01-01 00:10:00'
+		) && d.period;
+    $q$);
+	
+	RAISE NOTICE '';
+	RAISE EXCEPTION '';
 EXCEPTION WHEN OTHERS THEN
-    NULL;
+	NULL;
 END;
 END;
 $$;
 
-
 RESET ROLE;
 
-CALL speed_test();
+CALL speed_test('Без индекса');
 
 CREATE INDEX departures_operations_index
 ON departures_operations
 USING GIST (period);
 
-CALL speed_test();
+CALL speed_test('GiST');
 
 ROLLBACK;
