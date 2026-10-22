@@ -29,6 +29,12 @@ WITH regions_and_cities AS (
     UNION ALL SELECT 'Новосибирская обл., г. Новосибирск'
     UNION ALL SELECT 'Ленинградская обл., г. Санкт-Петербург'
     UNION ALL SELECT 'Красноярский кр., г. Красноярск'
+	UNION ALL SELECT 'Омская обл., г. Омск'
+	UNION ALL SELECT 'Томская обл., г. Томск'
+	UNION ALL SELECT 'Амурская обл., г. Благовещенск'
+	UNION ALL SELECT 'Архангельская обл., г. Архангельск'
+	UNION ALL SELECT 'Астраханская обл., г. Астрахань'
+	UNION ALL SELECT 'Белгородская обл., г. Белгород'
 ), streets AS (
     SELECT 'ул. Октябрьская' AS street
     UNION ALL SELECT 'ул. Ленина'
@@ -39,6 +45,7 @@ WITH regions_and_cities AS (
     UNION ALL SELECT 'ул. Гоголя'
     UNION ALL SELECT 'ул. Маяковского'
     UNION ALL SELECT 'ул. Лермонтова'
+	UNION ALL SELECT 'ул. Крылова'
 )
 INSERT INTO raw_addresses_data (
     system,
@@ -64,27 +71,31 @@ CROSS JOIN streets;
 TRUNCATE TABLE stg.raw_addresses CASCADE;
 
 
-CREATE PROCEDURE speed_test()
+CREATE PROCEDURE speed_test(title TEXT)
 LANGUAGE plpgsql
 AS $$
 BEGIN
 BEGIN
-    RAISE NOTICE 'Insert execution time: % ms', query_execution_time($q$
+    RAISE NOTICE '%', title;
+
+    RAISE NOTICE 'Вставка данных: % ms', query_execution_time($q$
         INSERT INTO stg.raw_addresses (
-			system,
-    		created_address_id,
-    		raw_text
-		)
+            system,
+            created_address_id,
+            raw_text
+        )
         SELECT *
         FROM raw_addresses_data;
     $q$);
 
-    RAISE NOTICE 'Search execution time: % ms', query_execution_time($q$
+    RAISE NOTICE 'Поиск по префиксу: % ms', query_execution_time($q$
         SELECT raw_text
         FROM stg.raw_addresses ra
-        WHERE ra.raw_text LIKE 'Новосибирская обл., г. Новосибирск, ул. Октябрьская%';
+        WHERE ra.raw_text
+			LIKE 'Новосибирская обл., г. Новосибирск, ул. Октябрьская%';
     $q$);
-    
+
+    RAISE NOTICE '';
     RAISE EXCEPTION '';
 EXCEPTION WHEN OTHERS THEN
     NULL;
@@ -95,12 +106,12 @@ $$;
 
 RESET ROLE;
 
-CALL speed_test();
+CALL speed_test('Без индекса');
 
 CREATE INDEX index_raw_addresses
 ON stg.raw_addresses
 USING SPGIST (raw_text);
 
-CALL speed_test();
+CALL speed_test('SP-GiST');
 
 ROLLBACK;
