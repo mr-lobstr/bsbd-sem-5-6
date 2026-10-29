@@ -5,11 +5,17 @@ services:
         build:
             context: .
             dockerfile: Dockerfile.db_builder
-        volumes:
-            - db_storage:/var/lib/postgresql/18/docker
         ports:
             - "15432:5432"
+        command: sh -c "chown postgres:postgres /etc/postgresql/ssl && docker-entrypoint.sh postgres"
+        volumes:
+            - db_storage:/var/lib/postgresql/18
+            - ssl_keys:/etc/postgresql/ssl
 
 volumes:
     db_storage:
         driver: local
+
+    ssl_keys:
+        driver: local
+

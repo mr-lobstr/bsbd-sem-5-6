@@ -1,0 +1,10 @@
+services:
+    postal_db_files_writer:
+        image: alpine:latest
+        container_name: postal_db_files_writer
+        command: sh -c "sleep 3600"
+        volumes:
+            - db_storage:/postal_db_files
+
+volumes:
+    db_storage:

@@ -3,7 +3,8 @@ SSL_DIR=/etc/postgresql/ssl
 CONF=var/lib/postgresql/18/docker/postgresql.conf
 HBA_CONF=var/lib/postgresql/18/docker/pg_hba.conf
 
-mkdir $SSL_DIR
+mkdir -p $SSL_DIR
+chown postgres:postgres $SSL_DIR
 
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -subj "/C=RU/ST=S/L=L/O=O/OU=D/CN=localhost" \
